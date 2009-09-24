@@ -1,6 +1,18 @@
 <?php
   include("../../../lib/php/v1/dawanda.php");
   $api = new DaWandaAPI("380d7924396f5596116f3d8815c97dfd8c975582", "de");
+  
+  if($_GET["username"]) {
+    $firstPuzzle = null;
+    $error = null;
+    $products = null;
+    
+    try {
+      $products = $api->getProductsForShop($_GET["username"], array("per_page" => 7));
+    } catch(Exception $e) {
+      $error = "Username is invalid!";
+    }
+  }
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -76,6 +88,14 @@
       -moz-border-radius: 8px;
       -webkit-border-radius: 8px;
     }
+    
+    .error {
+      text-align: center;
+      border: 1px solid #900;
+      background: red;
+      width: 400px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -83,31 +103,30 @@
     <form action="index.php" method="get">
       Username:
       <input type="text" name="username" value="<?= $_GET["username"] ?>" />
-      <input type="button" value="Go!" />
+      <input type="submit" value="Go!" />
     </form>
+    <?php if($error != null) echo '<div class="error">'. $error .'</div>' ?>
   </center>
-
-  <?php if($_GET["username"]) { ?>
-    <div id="puzzle" valign="middle"></div>
-    <div id="others">
-      <?php
-        $firstPuzzle = null;      
-        $products = $api->getProductsForShop($_GET["username"], array("per_page" => 7));
-
-        foreach($products->result->products as $product) {
-          $img = $product->images[0]->image_80x80;
-          if($firstPuzzle == null) $firstPuzzle = $img;
-          
-          echo '<div style="background: transparent url('. $img .')" onclick="changePuzzle(\''. $img .'\'); return false;"></div>';
-        }
-      ?>
-    </div>
   
-    <?php if($firstPuzzle != null) { ?>
+  <?php if($products != null) { ?>
+  <div id="puzzle" valign="middle"></div>
+  <div id="others">
+    <?php
+      foreach($products->result->products as $product) {
+        $img = $product->images[0]->image_80x80;
+        if($firstPuzzle == null) $firstPuzzle = $img;
+        echo '<div style="background: transparent url('. $img .')" onclick="changePuzzle(\''. $img .'\'); return false;"></div>';
+      }
+    ?>
+  </div>
+  
+  <?php if($firstPuzzle != null) { ?>
       <script type="text/javascript" charset="utf-8">
         changePuzzle("<?= $firstPuzzle ?>");
       </script>
-    <?php } ?>
-  <?php } ?>
+  <?php
+      }
+    }
+  ?>
 </body>
 </html>

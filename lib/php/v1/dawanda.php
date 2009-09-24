@@ -136,8 +136,11 @@
       $url .= "?api_key=".$this->apiKey;
       foreach(array_keys($params) as $key) $url .= "&".$key."=".$params[$key];
       
-      $json = file_get_contents($url);
-      return (json_decode($json)->response);
+      $json = @file_get_contents($url);
+      if($json)
+        return (json_decode($json)->response);
+      else
+        throw new Exception("An error occurred while requesting: ".$url);
     }
   }
 ?>
