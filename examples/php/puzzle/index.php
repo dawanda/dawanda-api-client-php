@@ -1,5 +1,5 @@
 <?php
-  include("/Users/prototype/Projects/dawanda-api/lib/php/v1/dawanda.php");
+  include("../../../lib/php/v1/dawanda.php");
   $api = new DaWandaAPI("380d7924396f5596116f3d8815c97dfd8c975582", "de");
 ?>
 
