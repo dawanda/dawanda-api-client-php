@@ -87,28 +87,27 @@
     </form>
   </center>
 
-  <div id="puzzle" valign="middle"></div>
-  <div id="others">
-    <?php
-      $firstPuzzle = null;
-
-      if($_GET["username"]) {
+  <?php if($_GET["username"]) { ?>
+    <div id="puzzle" valign="middle"></div>
+    <div id="others">
+      <?php
+        $firstPuzzle = null;      
         $products = $api->getProductsForShop($_GET["username"], array("per_page" => 7));
 
         foreach($products->result->products as $product) {
           $img = $product->images[0]->image_80x80;
           if($firstPuzzle == null) $firstPuzzle = $img;
-
+          
           echo '<div style="background: transparent url('. $img .')" onclick="changePuzzle(\''. $img .'\'); return false;"></div>';
         }
-      }
-    ?>
-  </div>
+      ?>
+    </div>
   
-  <?php if($firstPuzzle != null) { ?>
-    <script type="text/javascript" charset="utf-8">
-      changePuzzle("<?= $firstPuzzle ?>");
-    </script>
+    <?php if($firstPuzzle != null) { ?>
+      <script type="text/javascript" charset="utf-8">
+        changePuzzle("<?= $firstPuzzle ?>");
+      </script>
+    <?php } ?>
   <?php } ?>
 </body>
 </html>
