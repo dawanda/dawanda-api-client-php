@@ -17,28 +17,30 @@
       
       img.onload = function() {
         $("#puzzle").empty();
-        $("#puzzle")
-  	    .append(
-  	      $('<div class="puzzle" style="float: left ; margin-right: 50px ;"></div>')
-  	      .append('<img src="'+ src +'" width="'+img.width+'" height="'+img.height+'" />')
-  	    );
-  	    $("div.puzzle, p").puzzle(120);
-  	    $("div.puzzle").css({
+        $("#puzzle").append('<img src="'+ src +'" width="'+img.width+'" height="'+img.height+'" />');
+  	    $("#puzzle, p").puzzle(120);
+  	    $("#puzzle").css({
   	      left: "50%",
-  	      marginLeft: -Math.floor(img.width/2),
-  	      marginRight: 0,
-  	      border: "none",
-  	      position: "absolute"
+  	      position: "absolute",
+  	      margin: "10px",
+  	      marginLeft: -(Math.floor(img.width/2) - 30)
   	    });
   	    
-  	    $("#puzzle").append('<div style="clear:both"></div>');
-  	    $("#container").css({height: img.height+5});
+  	    window.setTimeout(function(){
+  	      $("#others").css({
+              left: Math.round($("#puzzle").offset().left + $("#puzzle").width())
+          });
+  	    }, 10);
       }
     }
   </script>
   <style type="text/css" media="screen">
+    body {
+      overflow-x:hidden;
+      width:100%;
+    }
+    
     #container {
-      border:1px solid black;
       left:50%;
       margin-left:-450px;
       margin-top:20px;
@@ -48,17 +50,31 @@
     }
     
     #others {
-      float: right;
       width: 90px;
+      position: relative;
+      top: 5px;
     }
     
-    #others img {
+    #others div {
       display: block;
+      width: 80px;
+      height: 80px;
       margin-top: 5px;
+      border: 2px solid #aaa;
+      -moz-border-radius: 8px;
+      -webkit-border-radius: 8px;
     }
     
     #puzzle {
-      float: left;
+      border: 2px solid #aaa !important;
+      -moz-border-radius: 10px;
+      -webkit-border-radius: 10px;
+      background-color: #f7f7f7;
+    }
+    
+    #puzzle div {
+      -moz-border-radius: 8px;
+      -webkit-border-radius: 8px;
     }
   </style>
 </head>
@@ -71,27 +87,24 @@
     </form>
   </center>
 
-  <div id="container">
-    <div id="others">
-      <?php
-        $firstPuzzle = null;
-      
-        if($_GET["username"]) {
-          $products = $api->getProductsForShop($_GET["username"], array("per_page" => 7));
-          
-          foreach($products->result->products as $product) {
-            $img = $product->images[0]->image_80x80;
-            if($firstPuzzle == null) $firstPuzzle = $img;
-            
-            echo '<img src="'. $img .'" onclick="changePuzzle(\''. $img .'\'); return false;" />';
-          }
+  <div id="puzzle" valign="middle"></div>
+  <div id="others">
+    <?php
+      $firstPuzzle = null;
+
+      if($_GET["username"]) {
+        $products = $api->getProductsForShop($_GET["username"], array("per_page" => 7));
+
+        foreach($products->result->products as $product) {
+          $img = $product->images[0]->image_80x80;
+          if($firstPuzzle == null) $firstPuzzle = $img;
+
+          echo '<div style="background: transparent url('. $img .')" onclick="changePuzzle(\''. $img .'\'); return false;"></div>';
         }
-      ?>
-      <div style="clear: both"></div>
-    </div>
-    <div id="puzzle"></div>
-    <div style="clear: both"></div>
+      }
+    ?>
   </div>
+  
   <?php if($firstPuzzle != null) { ?>
     <script type="text/javascript" charset="utf-8">
       changePuzzle("<?= $firstPuzzle ?>");
