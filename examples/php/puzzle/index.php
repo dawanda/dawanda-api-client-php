@@ -91,10 +91,13 @@
     
     .error {
       text-align: center;
-      border: 1px solid #900;
-      background: red;
+      border: 2px solid #900;
+      background: #DFC3C3;
       width: 400px;
       margin-top: 10px;
+      -moz-border-radius: 10px;
+      -webkit-border-radius: 10px;
+      padding: 5px;
     }
   </style>
 </head>
