@@ -10,7 +10,7 @@
         throw new Exception("DaWanda only supports the following languages: ".join(", ", $this->AVAILABLE_LANGUAGES));
       
       $this->apiKey = $apiKey;
-      $this->host = "http://". $language .".dawanda.com";
+      $this->host = "http://". $language .".devanda.com";
     }
     
     function searchUsers($keyword, $params=array()) {
