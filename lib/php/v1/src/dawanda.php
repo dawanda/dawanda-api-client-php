@@ -130,13 +130,13 @@
         "getProductsForColor"           => "/colors/#{id}/products.json"
       );
       
-      return $this->host."/api/v".($this->API_VERSION).str_replace("#{id}", $id, $endpoints[$callee]);
+      return $this->host."/api/v".(DaWandaAPI::$API_VERSION).str_replace("#{id}", $id, $endpoints[$callee]);
     }
     
     function requestApi($url, $params) {
       $url .= "?api_key=".$this->apiKey;
       foreach(array_keys($params) as $key) $url .= "&".$key."=".$params[$key];
-      
+
       $json = @file_get_contents($url);
       
       if($json)

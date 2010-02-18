@@ -1,6 +1,6 @@
 <?php
   include("../../../lib/php/v1/src/dawanda.php");
-  $api = new DaWandaAPI("4462d4e18202291359ff68fca0a93db179455c23", "de");
+  $api = new DaWandaAPI("380d7924396f5596116f3d8815c97dfd8c975582", "de");
   
   if($_GET["username"]) {
     $firstPuzzle = null;
