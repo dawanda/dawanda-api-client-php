@@ -1,5 +1,5 @@
 <?
-  require_once ('functions.php');
+  require_once ('config.php');
   require_once ("lib/OAuth.php");
   include("../../../lib/php/v1/src/dawanda.php");
 
