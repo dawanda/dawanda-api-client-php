@@ -152,8 +152,6 @@
     private $endpoints = null;
     private $base_url = null;
     private $consumer = null;
-    public  $access_token = null;
-    private $access_token_request = null;
     private $host = null;
     private $sig_method = null;
   
@@ -214,29 +212,45 @@
     function getAccessToken($token, $token_secret) {
       $auth_token = new OAuthConsumer($token, $token_secret);
 
-      @$this->access_token_request or $this->access_token_request = new OAuthRequest("GET", $this->endpoints["access_token"]);
-      $this->access_token_request = $this->access_token_request->from_consumer_and_token($this->consumer, $auth_token, "GET", $this->endpoints["access_token"]);
-      $this->access_token_request->sign_request($this->sig_method, $this->consumer, $auth_token);
+      // rq_token => acc_token
+      $req = new OAuthRequest("GET", $this->endpoints["access_token"]);
+      $req = $req->from_consumer_and_token($this->consumer, $auth_token, "GET", $this->endpoints["access_token"]);
+      $req->sign_request($this->sig_method, $this->consumer, $auth_token);
+      $req_result = $this->doHttpRequest($req->to_url());
+      parse_str($req_result, $access_tokens);
       
-      $access_token_req_result = $this->doHttpRequest($this->access_token_request->to_url());
-      parse_str($access_token_req_result, $access_tokens);
-
-      $this->access_token = new OAuthConsumer($access_tokens['oauth_token'], $access_tokens['oauth_token_secret']);
-      return $this->access_token;
+      return new OAuthConsumer($access_tokens['oauth_token'], $access_tokens['oauth_token_secret']);
     }
     
-    function getUserDetails() {
-      $req = $this->access_token_request->from_consumer_and_token($this->consumer, $this->access_token, "GET", $this->host."/api/v1/oauth/users.json");
-      $req->sign_request($this->sig_method, $this->consumer, $this->access_token);
+    function saveAccessToken($accessToken) {
+      $file = fopen("token.csv", "w+");
+      fputcsv($file, array($accessToken->key, $accessToken->secret));
+      fclose($file);
+    }
+    
+    function loadAccessToken() {
+      $file = fopen("token.csv", "r");
+      $data = fgetcsv($file);
+      fclose($file);
+      
+      return new OAuthConsumer($data[0], $data[1]);
+    }
+    
+    function getUserDetails($access_token) {
+      $req = new OAuthRequest("GET", $this->endpoints["access_token"]);
+      $req = $req->from_consumer_and_token($this->consumer, $access_token, "GET", $this->host."/api/v1/oauth/users.json");
+      $req->sign_request($this->sig_method, $this->consumer, $access_token);
       $req_result = $this->doHttpRequest($req->to_url());
+
       return json_decode($req_result)->response->result->user;
     }
     
-    function getOrders($timestamp = null) {
+    function getOrders($access_token, $timestamp = null) {
       $url = $this->host."/api/v1/oauth/orders.json" . (is_null($timestamp) ? "" : "?from=".@date('Y/m/d', $timestamp));
       
-      $req = $this->access_token_request->from_consumer_and_token($this->consumer, $this->access_token, "GET", $url);
-      $req->sign_request($this->sig_method, $this->consumer, $this->access_token);
+      $req = new OAuthRequest("GET", $this->endpoints["access_token"]);
+      $req = $req->from_consumer_and_token($this->consumer, $access_token, "GET", $url);
+      $req->sign_request($this->sig_method, $this->consumer, $access_token);
       $req_result = $this->doHttpRequest($req->to_url());
       return json_decode($req_result)->response->result->orders;
     }

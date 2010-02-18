@@ -3,15 +3,21 @@
   require_once ("lib/OAuth.php");
   include("../../../lib/php/v1/src/dawanda.php");
 
+  session_start();
+
   $dawanda_oauth = new DaWandaOAuth($key, $secret, "de");
 
-  $token = $_REQUEST['token'];
-  $token_secret = $_REQUEST['token_secret'];
-
-  $access_token = $dawanda_oauth->getAccessToken($token, $token_secret);
-  $user         = $dawanda_oauth->getUserDetails();
-  $orders       = $dawanda_oauth->getOrders();
-  $date_orders  = $dawanda_oauth->getOrders(time());
+  if($_REQUEST['token'] && $_REQUEST['token_secret']) {
+    $access_token = $dawanda_oauth->getAccessToken($_REQUEST['token'], $_REQUEST['token_secret']);
+    $dawanda_oauth->saveAccessToken($access_token);
+    
+    Header("Location: callback.php");
+  }
+  
+  $access_token = $dawanda_oauth->loadAccessToken();
+  $user         = $dawanda_oauth->getUserDetails($access_token);
+  $orders       = $dawanda_oauth->getOrders($access_token);
+  $date_orders  = $dawanda_oauth->getOrders($access_token, time());
 ?>
 
 <html>
