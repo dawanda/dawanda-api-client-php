@@ -2,15 +2,16 @@
   class DaWandaAPI {
     private $apiKey = null;
     private $host = null;
-    private $API_VERSION = 1;
-    private $AVAILABLE_LANGUAGES = array("de", "fr", "en");
+    public static $API_VERSION = 1;
+    public static $AVAILABLE_LANGUAGES = array("de", "fr", "en");
+    public static $BASE_HOST = ".dawanda.com";
     
-    function DaWandaAPI($apiKey, $language) {
-      if(!in_array($language, $this->AVAILABLE_LANGUAGES))
-        throw new Exception("DaWanda only supports the following languages: ".join(", ", $this->AVAILABLE_LANGUAGES));
+    function __construct($apiKey, $language) {
+      if(!in_array($language, DaWandaAPI::$AVAILABLE_LANGUAGES))
+        throw new Exception("DaWanda only supports the following languages: ".join(", ", DaWandaAPI::$AVAILABLE_LANGUAGES));
       
       $this->apiKey = $apiKey;
-      $this->host = "http://". $language .".devanda.com";
+      $this->host = "http://".$language.DaWandaAPI::$BASE_HOST;
     }
     
     function searchUsers($keyword, $params=array()) {
@@ -142,6 +143,102 @@
         return (json_decode($json)->response);
       else
         throw new Exception("An error occurred while requesting: ".$url);
+    }
+  }
+  
+  class DaWandaOAuth {
+    private $key = null;
+    private $secret = null;
+    private $endpoints = null;
+    private $base_url = null;
+    private $consumer = null;
+    public  $access_token = null;
+    private $access_token_request = null;
+    private $host = null;
+    private $sig_method = null;
+  
+    function __construct($key, $secret, $language, $sig_method = null) {
+      if(!in_array($language, DaWandaAPI::$AVAILABLE_LANGUAGES))
+        throw new Exception("DaWanda only supports the following languages: ".join(", ", DaWandaAPI::$AVAILABLE_LANGUAGES));
+      
+      if(!class_exists("OAuthConsumer"))
+        throw new Exception("Unable to find OAuth classes! Please require OAuth.php.");
+      
+      $url = "http".((!empty($_SERVER['HTTPS'])) ? "s" : "")."://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
+      $this->base_url = substr($url, 0, strrpos($url, "/"));
+      
+      $this->key = $key;
+      $this->secret = $secret;
+      $this->consumer = new OAuthConsumer($this->key, $this->secret, NULL);
+      $this->host = "http://".$language.DaWandaAPI::$BASE_HOST;
+      
+      $this->endpoints = array(
+        "authorize"     => $this->host."/oauth/authorize",
+        "request_token" => $this->host."/oauth/request_token",
+        "access_token"  => $this->host."/oauth/access_token"
+      );
+      
+      $this->sig_method = is_null($sig_method) ? new OAuthSignatureMethod_HMAC_SHA1() : $sig_method;
+    }
+  
+    function doHttpRequest($urlreq) {
+      $curl = curl_init();
+      curl_setopt($curl, CURLOPT_URL, "$urlreq");
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+      $request_result = curl_exec($curl);
+      curl_close($curl);
+
+      return $request_result;
+    }
+  
+    function requestAuthorization($callback_file) {
+      $parsed = parse_url($this->endpoints["request_token"]);
+      $params = array(callback => $this->base_url);
+      parse_str($parsed['query'], $params);
+
+      $req_req = OAuthRequest::from_consumer_and_token($this->consumer, NULL, "GET", $this->endpoints["request_token"], $params);
+      $req_req->sign_request($this->sig_method, $this->consumer, NULL);
+
+      $req_token = $this->doHttpRequest($req_req->to_url());
+      parse_str ($req_token,$tokens);
+
+      $oauth_token = $tokens['oauth_token'];
+      $oauth_token_secret = $tokens['oauth_token_secret'];
+
+      $callback_url = "$this->base_url/$callback_file?key=$this->key&token=$oauth_token&token_secret=$oauth_token_secret&endpoint=" . urlencode($this->endpoints["authorize"]);
+      $auth_url = $this->endpoints["authorize"] . "?oauth_token=$oauth_token&oauth_callback=".urlencode($callback_url);
+
+      Header("Location: $auth_url");
+    }
+    
+    function getAccessToken($token, $token_secret) {
+      $auth_token = new OAuthConsumer($token, $token_secret);
+
+      @$this->access_token_request or $this->access_token_request = new OAuthRequest("GET", $this->endpoints["access_token"]);
+      $this->access_token_request = $this->access_token_request->from_consumer_and_token($this->consumer, $auth_token, "GET", $this->endpoints["access_token"]);
+      $this->access_token_request->sign_request($this->sig_method, $this->consumer, $auth_token);
+      
+      $access_token_req_result = $this->doHttpRequest($this->access_token_request->to_url());
+      parse_str($access_token_req_result, $access_tokens);
+
+      $this->access_token = new OAuthConsumer($access_tokens['oauth_token'], $access_tokens['oauth_token_secret']);
+      return $this->access_token;
+    }
+    
+    function getUserDetails() {
+      $req = $this->access_token_request->from_consumer_and_token($this->consumer, $this->access_token, "GET", $this->host."/api/v1/oauth/users.json");
+      $req->sign_request($this->sig_method, $this->consumer, $this->access_token);
+      $req_result = $this->doHttpRequest($req->to_url());
+      return json_decode($req_result)->response->result->user;
+    }
+    
+    function getOrders($timestamp = null) {
+      $url = $this->host."/api/v1/oauth/orders.json" . (is_null($timestamp) ? "" : "?from=".@date('Y/m/d', $timestamp));
+      
+      $req = $this->access_token_request->from_consumer_and_token($this->consumer, $this->access_token, "GET", $url);
+      $req->sign_request($this->sig_method, $this->consumer, $this->access_token);
+      $req_result = $this->doHttpRequest($req->to_url());
+      return json_decode($req_result)->response->result->orders;
     }
   }
 ?>

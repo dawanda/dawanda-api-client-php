@@ -1,41 +1,17 @@
 <?
-  require_once ("lib/OAuth.php");
   require_once ('functions.php');
+  require_once ("lib/OAuth.php");
+  include("../../../lib/php/v1/src/dawanda.php");
 
-  // get data from url params
+  $dawanda_oauth = new DaWandaOAuth($key, $secret, "de");
+
   $token = $_REQUEST['token'];
   $token_secret = $_REQUEST['token_secret'];
 
-  // generate consumer + auth token
-  $consumer = new OAuthConsumer($key, $secret, NULL);
-  $auth_token = new OAuthConsumer($token, $token_secret);
-  
-  // request access token
-  $access_token_req = new OAuthRequest("GET", $access_token_endpoint);
-  $access_token_req = $access_token_req->from_consumer_and_token($consumer, $auth_token, "GET", $access_token_endpoint);
-  $access_token_req->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $consumer, $auth_token);
-  $access_token_req_result = doHttpRequest($access_token_req->to_url());
-  parse_str($access_token_req_result, $access_tokens);
-
-  // create an access token
-  $access_token = new OAuthConsumer($access_tokens['oauth_token'], $access_tokens['oauth_token_secret']);
-  
-  // use the access token to get private user data
-  $user_data_req = $access_token_req->from_consumer_and_token($consumer, $access_token, "GET", "http://de.devanda.com/api/v1/oauth/users.json");
-  $user_data_req->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $consumer, $access_token);
-  $user_data_req_result = doHttpRequest($user_data_req->to_url());
-  $user = json_decode($user_data_req_result)->response->result->user;
-  
-  // use the access token to get user's order data
-  $order_data_req = $access_token_req->from_consumer_and_token($consumer, $access_token, "GET", "http://de.devanda.com/api/v1/oauth/orders.json");
-  $order_data_req->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $consumer, $access_token);
-  $order_data_req_result = doHttpRequest($order_data_req->to_url());
-  $orders = json_decode($order_data_req_result)->response->result->orders;
-
-  $date_order_data_req = $access_token_req->from_consumer_and_token($consumer, $access_token, "GET", "http://de.devanda.com/api/v1/oauth/orders.json?from=".@date('Y/m/d'));
-  $date_order_data_req->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $consumer, $access_token);
-  $date_order_data_req_result = doHttpRequest($date_order_data_req->to_url());
-  $date_orders = json_decode($date_order_data_req_result)->response->result->orders;
+  $access_token = $dawanda_oauth->getAccessToken($token, $token_secret);
+  $user         = $dawanda_oauth->getUserDetails();
+  $orders       = $dawanda_oauth->getOrders();
+  $date_orders  = $dawanda_oauth->getOrders(time());
 ?>
 
 <html>
@@ -97,7 +73,7 @@
           <h3>Statistics</h3>
           <div class="statistics">
             All orders: <?= count($orders) ?><br>
-            Todays orders (<?= @date("Y/m/d") ?>): <?= count($date_orders) ?>
+            Todays orders (<?= @date("Y/m/d", time()) ?>): <?= count($date_orders) ?>
           </div>
 
           <h3>All orders</h3>
