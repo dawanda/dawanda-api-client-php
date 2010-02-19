@@ -4,7 +4,7 @@
     private $host = null;
     public static $API_VERSION = 1;
     public static $AVAILABLE_LANGUAGES = array("de", "fr", "en");
-    public static $BASE_HOST = ".devanda.com";
+    public static $BASE_HOST = ".dawanda.com";
     
     function __construct($apiKey, $language) {
       if(!in_array($language, DaWandaAPI::$AVAILABLE_LANGUAGES))
