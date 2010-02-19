@@ -4,7 +4,7 @@
     private $host = null;
     public static $API_VERSION = 1;
     public static $AVAILABLE_LANGUAGES = array("de", "fr", "en");
-    public static $BASE_HOST = ".dawanda.com";
+    public static $BASE_HOST = ".devanda.com";
     
     function __construct($apiKey, $language) {
       if(!in_array($language, DaWandaAPI::$AVAILABLE_LANGUAGES))
@@ -233,7 +233,10 @@
       $data = fgetcsv($file);
       fclose($file);
       
-      return new OAuthConsumer($data[0], $data[1]);
+      if(count($data) == 2)
+        return new OAuthConsumer($data[0], $data[1]);
+      else
+        return null;
     }
     
     function getUserDetails($access_token) {
