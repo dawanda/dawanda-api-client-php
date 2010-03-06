@@ -17,7 +17,7 @@
     function getHost() {
       return $this->host;
     }
-    
+
     function searchUsers($keyword, $params=array()) {
       $params["keyword"] = $keyword;        
       $url = $this->getRequestPath("searchUsers");
