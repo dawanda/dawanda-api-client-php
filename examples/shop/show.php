@@ -63,10 +63,10 @@
         <div id="product_container">
           <div style="text-align: center;" id="pagination_container">
             <? if($current_page > 1) { ?>
-              <span id="back_button"><a href="show.php?username=<?= $_GET["username"] ?>&page=<?= $current_page -1 ?>">Zurück</a></span>&nbsp;&nbsp;&nbsp;
+              <span id="back_button"><a href="show.php?username=<?= $_GET["username"] ?>&shop_cat=<?= $_GET["shop_cat"] ?>&page=<?= $current_page -1 ?>">Zurück</a></span>&nbsp;&nbsp;&nbsp;
             <? } ?>
             <? if($current_page < $max_page) { ?>
-              <span id="forward_button"><a href="show.php?username=<?= $_GET["username"] ?>&page=<?= $current_page + 1 ?>">Weiter</a></span>
+              <span id="forward_button"><a href="show.php?username=<?= $_GET["username"] ?>&shop_cat=<?= $_GET["shop_cat"] ?>&page=<?= $current_page + 1 ?>">Weiter</a></span>
             <? } ?>
           </div>
           <ul id="products"><?= ($product_content == "")?"<li>Currently no data!</li>":$product_content ?><div style='clear:both;'></div></ul>
