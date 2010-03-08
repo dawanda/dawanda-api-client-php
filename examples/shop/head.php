@@ -52,6 +52,8 @@
   
   #category_container a {
     display: block;
+    color: #555;
+    text-decoration: none;
   }
   
   #product_container {
