@@ -14,8 +14,9 @@
     try {
       $shop_details = $api->getShopDetails($_GET["username"]);
       
-      foreach($shop_details->result->shop->shop_categories as $shop_category)
+      foreach($shop_details->result->shop->shop_categories as $shop_category) {
         $category_content .= "<li><a href='show.php?username=".$_GET["username"]."&shop_cat=".$shop_category->id."'>".$shop_category->name."</a></li>";
+      }
 
       $current_page = isset($_GET["page"]) ? $_GET["page"] : 1;
       $shop_category = isset($_GET["shop_cat"]) ? $_GET["shop_cat"] : $shop_details->result->shop->shop_categories[0]->id;
