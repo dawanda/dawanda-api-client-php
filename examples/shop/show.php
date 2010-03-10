@@ -32,6 +32,7 @@
               "<img border='0' src='".$product->images[0]->image_160x120."'>".
             "</a>".
             "<span>".substr($product->name, 0, 25).((strlen($product->name) > 25) ? "..." : "")."</span>".
+            "<div style='clear:both'></div>".
             "<span>".substr($product->user->name, 0, 20).((strlen($product->name) > 20) ? "..." : "")."</span>".
             "<span style='float:right'>".($product->price->cents/100)." ".$product->price->currency_code."</span>".
           "</li>";
