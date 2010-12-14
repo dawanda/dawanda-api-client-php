@@ -105,7 +105,14 @@
                   <? if($order->cents_shipping) { ?>
                     + <?= $order->cents_shipping / 100.0 ?> <?= $order->currency ?><br>
                   <? } ?>
+				  <? if($order->adjustment_cents) { ?>
+					+ <?= $order->adjustment_cents / 100.0 ?> <?= $order->currency ?><br>
+				  <? } ?>
                   = <?= $order->total_cents / 100.0 ?> <?= $order->currency ?><br>
+
+				  <? if($order->adjustment_reason) { ?>
+					<br/><?= $order->adjustment_reason ?>
+				  <? } ?>
                 </td>
                 <td>
                   Created at: <?= $order->created_at ?><br>
