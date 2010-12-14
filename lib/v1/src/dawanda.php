@@ -11,7 +11,7 @@
         throw new Exception("DaWanda only supports the following languages: ".join(", ", DaWandaAPI::$AVAILABLE_LANGUAGES));
       
       $this->apiKey = $apiKey;
-      $this->host = "http://".$language.DaWandaAPI::$BASE_HOST;
+      $this->host = "https://".$language.DaWandaAPI::$BASE_HOST;
     }
     
     function getHost() {
