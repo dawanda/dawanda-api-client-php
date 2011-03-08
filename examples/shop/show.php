@@ -30,7 +30,7 @@
           $product_content .= var_dump($product);
           $product_content .= "<li>asdasdasd".
             "<a href='".$api->getHost()."/product/$product->id' target='_blank'>".
-              "<img border='0' src='".$product->images[0]->image_160x120."'>".
+              "<img border='0' src='".$product->default_image->listview."'>".
             "</a>".
             "<span>".substr($product->name, 0, 25).((strlen($product->name) > 25) ? "..." : "")."</span>".
             "<div style='clear:both'></div>".
