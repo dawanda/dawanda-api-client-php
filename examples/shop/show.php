@@ -28,7 +28,7 @@
       } else {
         foreach($products->result->products as $product) {
           $product_content .= $product;
-          $product_content .= "<li>".
+          $product_content .= "<li>asdasdasd".
             "<a href='".$api->getHost()."/product/$product->id' target='_blank'>".
               "<img border='0' src='".$product->images[0]->image_160x120."'>".
             "</a>".
