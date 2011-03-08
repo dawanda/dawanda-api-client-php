@@ -27,7 +27,7 @@
         $product_content .= "<li>No products in this category.</li>";
       } else {
         foreach($products->result->products as $product) {
-          $product_content .= var_dump($product);
+          $product_content .= var_dump($product->default_image);
           $product_content .= "<li>asdasdasd".
             "<a href='".$api->getHost()."/product/$product->id' target='_blank'>".
               "<img border='0' src='".$product->default_image->listview."'>".
